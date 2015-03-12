@@ -9,6 +9,7 @@ This demo is based on original ChibiOS/demos/ARMCM4-STM32F407-DISCOVERY-MEMS
 
 Quick start
 ----------------
+```
 mkdir -p ~/src/elua_chibios/
 cd  -p ~/src/elua_chibios/
 git clone https://github.com/ChibiOS/ChibiOS.git
@@ -17,15 +18,22 @@ cd ~/src/elua_chibios/chibios_with_elua/ext/
 git clone https://github.com/elua/elua.git
 cd ~/src/elua_chibios/chibios_with_elua
 make
+```
 
 upload to STM32F4_DISCOVERY
+
 by default elua avaylable on USB serial (ttyACM0 in linux).
+
 you may switch to serial driver in halconf.h
 
 License
 -------
 Note, ChibiOS licensed under different licenses (Pure GPL3,GPL3 with Exception,Commercial).
+
 While eLua licensed under MIT.
+
 For more info refer to original sources.
+
 http://www.chibios.org/dokuwiki/doku.php?id=chibios:license
+
 http://www.eluaproject.net/overview/license
