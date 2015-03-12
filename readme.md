@@ -11,7 +11,7 @@ Quick start
 ----------------
 ```
 mkdir -p ~/src/elua_chibios/
-cd  -p ~/src/elua_chibios/
+cd  ~/src/elua_chibios/
 git clone https://github.com/ChibiOS/ChibiOS.git
 git clone https://github.com/linvinus/chibios_with_elua.git
 cd ~/src/elua_chibios/chibios_with_elua/ext/
