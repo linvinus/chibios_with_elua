@@ -1,5 +1,5 @@
 /*
-    ChibiOS/RT - Copyright (C) 2006-2013 Giovanni Di Sirio
+    ChibiOS - Copyright (C) 2006..2015 Giovanni Di Sirio
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -270,7 +270,7 @@ static void usb_event(USBDriver *usbp, usbevent_t event) {
   case USB_EVENT_ADDRESS:
     return;
   case USB_EVENT_CONFIGURED:
-    chSysLockFromIsr();
+    chSysLockFromISR();
 
     /* Enables the endpoints specified into the configuration.
        Note, this callback is invoked from an ISR so I-Class functions
@@ -281,7 +281,7 @@ static void usb_event(USBDriver *usbp, usbevent_t event) {
     /* Resetting the state of the CDC subsystem.*/
     sduConfigureHookI(&SDU1);
 
-    chSysUnlockFromIsr();
+    chSysUnlockFromISR();
     return;
   case USB_EVENT_SUSPEND:
     return;

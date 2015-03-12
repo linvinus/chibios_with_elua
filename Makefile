@@ -32,7 +32,7 @@ endif
 
 # Enable this if you want link time optimizations (LTO)
 ifeq ($(USE_LTO),)
-  USE_LTO = no
+  USE_LTO = yes
 endif
 
 # If enabled, this option allows to compile the application in THUMB mode.
@@ -54,6 +54,18 @@ USE_VERBOSE_COMPILE = yes
 # Architecture or project specific options
 #
 
+# Stack size to be allocated to the Cortex-M process stack. This stack is
+# the stack used by the main() thread.
+ifeq ($(USE_PROCESS_STACKSIZE),)
+  USE_PROCESS_STACKSIZE = 0x400
+endif
+
+# Stack size to the allocated to the Cortex-M main/exceptions stack. This
+# stack is used for processing interrupts and exceptions.
+ifeq ($(USE_EXCEPTIONS_STACKSIZE),)
+  USE_EXCEPTIONS_STACKSIZE = 0x400
+endif
+
 # Enables the use of FPU on Cortex-M4 (no, softfp, hard).
 ifeq ($(USE_FPU),)
 	#requred for elua
@@ -73,17 +85,16 @@ PROJECT = ch
 CHIBIOSLUA    ?= $(shell pwd)
 # Imported source files and paths
 CHIBIOS = $(CHIBIOSLUA)/../ChibiOS
-include $(CHIBIOS)/boards/ST_STM32F4_DISCOVERY/board.mk
-include $(CHIBIOS)/os/hal/platforms/STM32F4xx/platform.mk
 include $(CHIBIOS)/os/hal/hal.mk
-include $(CHIBIOS)/os/ports/GCC/ARMCMx/STM32F4xx/port.mk
-include $(CHIBIOS)/os/kernel/kernel.mk
-include $(CHIBIOS)/test/test.mk
+include $(CHIBIOS)/os/hal/boards/ST_STM32F4_DISCOVERY/board.mk
+include $(CHIBIOS)/os/hal/ports/STM32/STM32F4xx/platform.mk
+include $(CHIBIOS)/os/hal/osal/rt/osal.mk
+include $(CHIBIOS)/os/rt/rt.mk
+include $(CHIBIOS)/os/rt/ports/ARMCMx/compilers/GCC/mk/port_stm32f4xx.mk
+include $(CHIBIOS)/test/rt/test.mk
 
 # Define linker script file here
-#LDSCRIPT= $(PORTLD)/STM32F407xG.ld
 LDSCRIPT= STM32F407xG.ld
-#LDSCRIPT= $(PORTLD)/STM32F407xG_CCM.ld
 
 # C sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
@@ -91,11 +102,13 @@ CSRC = $(PORTSRC) \
        $(KERNSRC) \
        $(TESTSRC) \
        $(HALSRC) \
+       $(OSALSRC) \
        $(PLATFORMSRC) \
        $(BOARDSRC) \
        $(CHIBIOS)/os/various/devices_lib/accel/lis302dl.c \
        $(CHIBIOS)/os/various/shell.c \
-       $(CHIBIOS)/os/various/chprintf.c \
+       $(CHIBIOS)/os/hal/lib/streams/memstreams.c \
+       $(CHIBIOS)/os/hal/lib/streams/chprintf.c \
        usbcfg.c main.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
@@ -126,11 +139,11 @@ TCPPSRC =
 ASMSRC = $(PORTASM) $(EXT_ASMSRC)
 
 INCDIR = $(PORTINC) $(KERNINC) $(TESTINC) \
-         $(HALINC) $(PLATFORMINC) $(BOARDINC) \
+         $(HALINC) $(OSALINC) $(PLATFORMINC) $(BOARDINC) \
          $(CHIBIOSLUA) \
          $(EXT_INC) \
          $(CHIBIOS)/os/various/devices_lib/accel \
-         $(CHIBIOS)/os/various
+         $(CHIBIOS)/os/hal/lib/streams $(CHIBIOS)/os/various $(CHIBIOS)/os
 
 #
 # Project, sources and paths
@@ -153,6 +166,7 @@ LD   = $(TRGT)gcc
 #LD   = $(TRGT)g++
 CP   = $(TRGT)objcopy
 AS   = $(TRGT)gcc -x assembler-with-cpp
+AR   = $(TRGT)ar
 OD   = $(TRGT)objdump
 SZ   = $(TRGT)size
 HEX  = $(CP) -O ihex
@@ -179,7 +193,7 @@ CPPWARN = -Wall -Wextra
 #
 
 # List all default C defines here, like -D_DEBUG=1
-DDEFS = -DELUA_CPU_HEADER="\"cpu_chibios_cpu.h\"" -DELUA_BOARD_HEADER="\"board_stm32f4chibios.h\"" -DUSE_GIT_REVISION -DELUA_CPU=CHIBIOS_CPU -DELUA_BOARD=STM32F4CHIBIOS -DELUA_PLATFORM=CHIBIOS -D__BUFSIZ__=128 -DELUA_CPU_CHIBIOS_CPU -DELUA_BOARD_STM32F4CHIBIOS -DELUA_PLATFORM_CHIBIOS -DLUA_PACK_VALUE -DELUA_ENDIAN_LITTLE -DLUA_OPTIMIZE_MEMORY=2 -DFORCHIBIOS_CPU
+DDEFS += -DELUA_CPU_HEADER="\"cpu_chibios_cpu.h\"" -DELUA_BOARD_HEADER="\"board_stm32f4chibios.h\"" -DUSE_GIT_REVISION -DELUA_CPU=CHIBIOS_CPU -DELUA_BOARD=STM32F4CHIBIOS -DELUA_PLATFORM=CHIBIOS -D__BUFSIZ__=128 -DELUA_CPU_CHIBIOS_CPU -DELUA_BOARD_STM32F4CHIBIOS -DELUA_PLATFORM_CHIBIOS -DLUA_PACK_VALUE -DELUA_ENDIAN_LITTLE -DLUA_OPTIMIZE_MEMORY=2 -DFORCHIBIOS_CPU
 DDEFS += -DUSE_MULTIPLE_ALLOCATOR -DCHPRINTF_USE_FLOAT=TRUE
 #~ DDEFS += -DUSE_SIMPLE_ALLOCATOR
 
@@ -222,11 +236,8 @@ ULIBS =
 # End of user defines
 ##############################################################################
 
-#RULESPATH = $(CHIBIOS)/os/ports/GCC/ARMCMx
+#RULESPATH = $(CHIBIOS)/os/common/ports/ARMCMx/compilers/GCC
 #include $(RULESPATH)/rules.mk
 include $(CHIBIOSLUA)/ext/ext.mk
-
 include ./rules.mk
 
-
-######## resource usage show ################

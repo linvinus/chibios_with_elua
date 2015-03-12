@@ -15,7 +15,7 @@ end
 function get_platform_modules( board, cpu )
   return { 
     thd = { lib = '"thd"' },
-    zumo = { lib = '"zumo"' }
+    --~ zumo = { lib = '"zumo"' }
   }
 end
 

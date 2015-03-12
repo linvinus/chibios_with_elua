@@ -94,8 +94,7 @@ ELUA_SHELL_CSRC = $(ELUA)/src/shell/shell.c \
             $(ELUA)/src/shell/shell_mkdir.c \
             $(ELUA)/src/shell/shell_recv.c \
             $(ELUA)/src/shell/shell_ver.c \
-            $(ELUA)/src/shell/shell_wofmt.c \
-            $(ELUA)/src/shell/vi.c
+            $(ELUA)/src/shell/shell_wofmt.c
 
 
 ELUA_uIP_CSRC = $(ELUA)/src/uip/uip_arp.c \
@@ -112,7 +111,6 @@ ELUA_PLATFORM1_CSRC =  $(CHIBIOSLUA)/ext/platform_chibios/platform.c
 ELUA_PLATFORM2_CSRC = $(ELUA)/src/platform/arm_cortex_interrupts.c
 
 ELUA_EXT_CSRC =  $(CHIBIOSLUA)/ext/elua_chibios_mod.c \
-                 $(CHIBIOSLUA)/ext/elua_zumo.c \
                  $(CHIBIOSLUA)/ext/ch_lua.c
 
 #            $(ELUA)/src/platform/arm_utils.s \
@@ -133,7 +131,7 @@ ELUA_SHELL_OBJS   = $(addprefix $(BUILDDIR)/obj/, $(notdir $(ELUA_SHELL_CSRC:.c=
 ELUA_uIP_OBJS     = $(addprefix $(BUILDDIR)/obj/, $(notdir $(ELUA_uIP_CSRC:.c=.o.elua_uip)))
 ELUA_PLATFORM_OBJS= $(addprefix $(BUILDDIR)/obj/, $(notdir $(ELUA_PLATFORM_CSRC:.c=.o.elua_platform)))
 ELUA_FATFS_OBJS= $(addprefix $(BUILDDIR)/obj/, $(notdir $(ELUA_FATFS_CSRC:.c=.o.elua_fatfs)))
-ELUA_EXT_OBJS= $(BUILDDIR)/obj/ch_lua.o.ext $(BUILDDIR)/obj/elua_chibios_mod.o.ext  $(BUILDDIR)/obj/elua_zumo.o.ext $(BUILDDIR)/obj/platform.o.PLATFORM1  $(BUILDDIR)/obj/arm_cortex_interrupts.o.PLATFORM2
+ELUA_EXT_OBJS= $(BUILDDIR)/obj/ch_lua.o.ext $(BUILDDIR)/obj/elua_chibios_mod.o.ext  $(BUILDDIR)/obj/platform.o.PLATFORM1  $(BUILDDIR)/obj/arm_cortex_interrupts.o.PLATFORM2
 
 
 EXT_INC = $(CHIBIOSLUA)/ext \
@@ -152,6 +150,7 @@ EXT_ASMSRC = $(ELUA)/src/platform/cortex_utils.s
 
 EXT_PREPROCESS_SHELL=$(warning EXT_PREPROCESS_SHELL) \
    $(shell ln -s $(CHIBIOSLUA)/ext/stm32f4chibios.lua $(ELUA)/boards/known/stm32f4chibios.lua 2>/dev/null) \
+   $(shell ls $(ELUA)/src/platform/chibios >/dev/null 2>&1  || ln -s $(CHIBIOSLUA)/ext/platform_chibios $(ELUA)/src/platform/chibios >/dev/null 2>&1) \
    $(shell (cd ${ELUA} ; patch -N <$(CHIBIOSLUA)/ext/build_data.lua.diff ; ./build_elua.lua board=stm32f4chibios config_only=true; ./build_elua.lua board=stm32f4chibios) >>./build.log 2>&1)
 
 #main link with rules.mk

@@ -40,6 +40,20 @@ else
   DADEFS += -DCORTEX_USE_FPU=FALSE
 endif
 
+# Process stack size
+ifeq ($(USE_PROCESS_STACKSIZE),)
+  LDOPT := $(LDOPT),--defsym=__process_stack_size__=0x400
+else
+  LDOPT := $(LDOPT),--defsym=__process_stack_size__=$(USE_PROCESS_STACKSIZE)
+endif
+
+# Exceptions stack size
+ifeq ($(USE_EXCEPTIONS_STACKSIZE),)
+  LDOPT := $(LDOPT),--defsym=__main_stack_size__=0x400
+else
+  LDOPT := $(LDOPT),--defsym=__main_stack_size__=$(USE_EXCEPTIONS_STACKSIZE)
+endif
+
 # Output directory and files
 ifeq ($(BUILDDIR),)
   BUILDDIR = build
@@ -47,8 +61,15 @@ endif
 ifeq ($(BUILDDIR),.)
   BUILDDIR = build
 endif
-OUTFILES = $(BUILDDIR)/$(PROJECT).elf $(BUILDDIR)/$(PROJECT).hex \
-           $(BUILDDIR)/$(PROJECT).bin $(BUILDDIR)/$(PROJECT).dmp
+OUTFILES = $(BUILDDIR)/$(PROJECT).elf \
+           $(BUILDDIR)/$(PROJECT).hex \
+           $(BUILDDIR)/$(PROJECT).bin \
+           $(BUILDDIR)/$(PROJECT).dmp \
+           $(BUILDDIR)/$(PROJECT).list
+
+ifdef SREC
+OUTFILES += $(BUILDDIR)/$(PROJECT).srec
+endif
 
 # Source files groups and paths
 ifeq ($(USE_THUMB),yes)
@@ -60,10 +81,8 @@ else
 endif
 ASRC	  = $(ACSRC)$(ACPPSRC)
 TSRC	  = $(TCSRC)$(TCPPSRC)
-SRCPATHS  = $(sort $(dir $(ASMXSRC)) $(dir $(ASMSRC)) $(dir $(ASRC)) $(dir $(TSRC)) )
+SRCPATHS  = $(sort $(dir $(ASMXSRC)) $(dir $(ASMSRC)) $(dir $(ASRC)) $(dir $(TSRC)))
 
- #$(dir $(ELUA_ALL_CSRC))
- 
 # Various directories
 OBJDIR    = $(BUILDDIR)/obj
 LSTDIR    = $(BUILDDIR)/lst
@@ -75,7 +94,6 @@ TCOBJS    = $(addprefix $(OBJDIR)/, $(notdir $(TCSRC:.c=.o)))
 TCPPOBJS  = $(addprefix $(OBJDIR)/, $(notdir $(TCPPSRC:.cpp=.o)))
 ASMOBJS   = $(addprefix $(OBJDIR)/, $(notdir $(ASMSRC:.s=.o)))
 ASMXOBJS  = $(addprefix $(OBJDIR)/, $(notdir $(ASMXSRC:.S=.o)))
-#ELUAOBJS  = $(addprefix $(OBJDIR)/, $(notdir $(ELUA_CSRC:.c=_elua.o)))
 OBJS	  = $(ASMXOBJS) $(ASMOBJS) $(ACOBJS) $(TCOBJS) $(ACPPOBJS) $(TCPPOBJS) $(ELUA_ALL_OBJS)
 
 # Paths
@@ -230,17 +248,41 @@ else
 	@$(BIN) $< $@
 endif
 
+%.srec: %.elf $(LDSCRIPT)
+ifeq ($(USE_VERBOSE_COMPILE),yes)
+	$(SREC) $< $@
+else
+	@echo Creating $@
+	@$(SREC) $< $@
+endif
+
 %.dmp: %.elf $(LDSCRIPT)
 ifeq ($(USE_VERBOSE_COMPILE),yes)
 	$(OD) $(ODFLAGS) $< > $@
+	$(SZ) $<
 else
 	@echo Creating $@
 	@$(OD) $(ODFLAGS) $< > $@
 	@echo
 	@$(SZ) $<
+endif
+
+%.list: %.elf $(LDSCRIPT)
+ifeq ($(USE_VERBOSE_COMPILE),yes)
+	$(OD) -S $< > $@
+else
+	@echo Creating $@
+	@$(OD) -S $< > $@
 	@echo
 	@echo Done
 endif
+
+lib: $(OBJS) $(BUILDDIR)/lib$(PROJECT).a
+
+$(BUILDDIR)/lib$(PROJECT).a: $(OBJS)
+	@$(AR) -r $@ $^
+	@echo
+	@echo Done
 
 clean:
 	@echo Cleaning

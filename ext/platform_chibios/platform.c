@@ -34,14 +34,14 @@ int platform_init()
 
 // ****************************************************************************
 // PIO functions
-GPIO_TypeDef * const pio_port[] = { GPIOA, GPIOB, GPIOC, GPIOD, GPIOE, GPIOF, GPIOG, GPIOH, GPIOI };
+stm32_gpio_t *   const pio_port[] = { GPIOA, GPIOB, GPIOC, GPIOD, GPIOE, GPIOF, GPIOG, GPIOH, GPIOI };
 uint16_t const ignore_pins[] = { 1<<2|1<<3|1<<11|1<<12, /*A2,A3,A11,A12 UART2 RX,TX,GPIOA_OTG_FS_DM,GPIOA_OTG_FS_DP */
 								0,0,0,0,0,0,0,0,0};
 
 pio_type platform_pio_op( unsigned port, pio_type pinmask, int op )
 {
   pio_type retval = 1;//ok , 0-error
-  GPIO_TypeDef * target_port = pio_port[ port ];
+  stm32_gpio_t * target_port = pio_port[ port ];
   uint16_t new_state = 0xffff;
   
   switch( op )
@@ -169,19 +169,19 @@ timer_data_type platform_s_timer_op( unsigned id, int op, timer_data_type data )
   {
     case PLATFORM_TIMER_OP_START:
       //~ TIM_SetCounter( ptimer, 0 );
-      res = chTimeNow();
+      res = chVTGetSystemTime();
       break;
 
     case PLATFORM_TIMER_OP_READ:
-      res = chTimeNow();//TIM_GetCounter( ptimer );
+      res = chVTGetSystemTime();//TIM_GetCounter( ptimer );
       break;
 
     case PLATFORM_TIMER_OP_SET_CLOCK:
-      res = CH_FREQUENCY;//platform_timer_set_clock( id, data );
+      res = CH_CFG_ST_FREQUENCY;//platform_timer_set_clock( id, data );
       break;
 
     case PLATFORM_TIMER_OP_GET_CLOCK:
-      res = CH_FREQUENCY;//platform_timer_get_clock( id );
+      res = CH_CFG_ST_FREQUENCY;//platform_timer_get_clock( id );
       break;
 
     case PLATFORM_TIMER_OP_GET_MAX_CNT:
@@ -195,7 +195,7 @@ timer_data_type platform_s_timer_op( unsigned id, int op, timer_data_type data )
 
 u64 platform_timer_sys_raw_read()
 {
-  return MS2ST(chTimeNow());
+  return MS2ST(chVTGetSystemTime());
 }
 
 void platform_timer_sys_disable_int()
@@ -210,5 +210,5 @@ void platform_timer_sys_enable_int()
 
 timer_data_type platform_timer_read_sys()
 {
-  return MS2ST(chTimeNow());
+  return MS2ST(chVTGetSystemTime());
 }
