@@ -1,0 +1,12 @@
+build/
+.dep/
+*.hex
+*.elf
+*.dfu
+*.o
+*.obj
+*.exe
+*.bin
+*.pyc
+*.map
+build.log

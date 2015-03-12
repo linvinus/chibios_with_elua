@@ -1,0 +1,12 @@
+--- ./build_data.lua.orig	2014-11-10 15:58:33.000000000 +0300
++++ ./build_data.lua	2014-11-08 08:43:51.000000000 +0300
+@@ -114,7 +114,8 @@
+   stm32f4 = { cpus =  { 'STM32F401RE', 'STM32F407VG', 'STM32F407ZG' }, arch = 'cortexm' },
+   avr32 = { cpus = { 'AT32UC3A0128', 'AT32UC3A0256', 'AT32UC3A0512', 'AT32UC3B0256' }, arch = 'avr32' },
+   lpc24xx = { cpus = { 'LPC2468' }, arch = 'arm' },
+-  lpc17xx = { cpus = { 'LPC1768' }, arch = 'cortexm' }
++  lpc17xx = { cpus = { 'LPC1768' }, arch = 'cortexm' },
++  chibios = { cpus = { 'CHIBIOS_CPU' }, arch = 'cortexm' }
+ }
+ 
+ -- Returns the platform of a given CPU
