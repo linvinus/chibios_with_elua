@@ -22,7 +22,7 @@ make
 
 upload to STM32F4_DISCOVERY
 
-by default elua avaylable on USB serial (ttyACM0 in linux).
+by default elua available on USB serial (ttyACM0 in linux).
 
 you may switch to serial driver in halconf.h
 
